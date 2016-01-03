@@ -1,0 +1,169 @@
+#### See line 98 for Two variable Homework set!!!
+#==================================================
+library(ggplot2)
+data(diamonds)
+#Below gave the answer to Q1#
+length(diamonds$price)
+names(diamonds)
+summary(diamonds)
+#Below gave the answers to Q2, Q3, Q4#
+?diamonds
+
+by(diamonds$price, diamonds$color, summary)
+
+#Problem set 3, Part 2) 
+
+qplot(x = price, data = diamonds) +
+  scale_x_continuous()
+
+#Part 3 Data represents a longtailed distribution of the data with a median price around 2400 dollars.#
+
+#Part 4
+sum(diamonds$price < 500)
+sum(diamonds$price < 250)
+sum(diamonds$price >= 15000)
+
+#Part 5
+qplot(x = price, data = diamonds, binwidth = 10) +
+  scale_x_continuous(limits= c(300, 1200), breaks = seq(450,1200, 100))
+#Part 6
+qplot(x = price, data = diamonds, binwidth = 10) +
+  scale_x_continuous(limits= c(300, 1200), breaks = seq(450,1200, 100))+
+  facet_wrap(~cut)
+#Part 7
+by(diamonds$price, diamonds$cut, max)
+by(diamonds$price, diamonds$cut, min)
+by(diamonds$price, diamonds$cut, median)
+#Part 8
+qplot(x = price, data = diamonds) + facet_wrap(~cut, scales = "free_y")
+?facet_wrap
+# Part 9
+qplot(y=price/carat, data=diamonds)+
+  scale_x_log10()+
+  facet_wrap(~cut)
+# Part 10
+plot(y=price/carat, x=color,  data=diamonds, geom="boxplot", fill=color)+
+  coord_cartesian(ylim=c(0,7500))
+# Part 11
+?diamonds
+by(diamonds$price, diamonds$color, summary)
+# Part 12
+qplot(y=price/carat, x=color,  data=diamonds, geom="boxplot", fill=color)+
+  coord_cartesian(ylim=c(0,7500))
+#Part 13
+qplot(x = carat, data = diamonds, geom = "freqpoly", color = carat, binwidth = .1) +
+  scale_x_continuous(limits= c(0,3), breaks = seq(0,3, .1))+
+  coord_cartesian(ylim = c(0,2000))
+
+table(diamonds$carat)
+
+# Part 14
+#Reading in data realted to the Gapminder dataset for Cellphones per 100 people
+gap <- read.csv("Gapminder- Cell phone per 100.csv", sep =',')
+names(gap)
+names(gap)[1]<- "country"
+library(dplyr)
+library(tidyr)
+
+#Utilizing Tidyr to manipulate data into a Tidy table
+dat <- gather(gap, "year","cell_phone_per_100", 2:48)
+
+#Cleaing out the character X which had marked all of my Year data
+dat$year <- gsub('X','',dat$year)
+
+#Plot1 - Plotting a Histogram for the year 2011 for all countries in the dataset
+qplot(y = cell_phone_per_100, x = year,  data= subset(dat, year== 2011), 
+      geom="boxplot",
+      xlab = 'Year 2011',
+      ylab = 'Cell phones per 100 people') +
+  coord_cartesian(ylim = c(25,175))
+
+# Plot2 - 1st filtering for data in 1990 and 2011 because I couldn't get my | logical operator right. 
+
+dat2011 <- filter(dat, year == 2011)
+dat2000 <- filter(dat, year == 2000)
+
+# 2nd Merging the two datasets
+data2000_2011 <- full_join(dat2000, dat2011)
+
+# 3rd Plotting the distrubtion of world cell phones per 100 people in 2011 and 1990
+qplot(x = log10(cell_phone_per_100), data = data2000_2011,
+      geom = 'freqpoly', color = year)
+
+
+# Part 15-  Used the Provided Facebook data to perform the analysis on DOB Data
+qplot(x = dob_day, data = pf) +
+  scale_x_discrete(count = 1:31) +
+  facet_wrap(~dob_month, ncol = 3)
+
+# Exploring 2 Varible Lessons in problem set #4- 
+# Q1- Scatter plot of Price and X
+ggplot(aes(x, price), data = diamonds) +
+  geom_point()
+# Q2 - These varialbes seem to indicate the data represents price to be on a log scale
+# Q3 - 
+cor(diamonds$x, diamonds$price)
+cor(diamonds$price, diamonds$y)
+cor(diamonds$price, diamonds$z)
+# Q4
+ggplot(aes(depth, price), data = diamonds) +
+  geom_point()
+# Q5
+ggplot(aes(depth, price), data = diamonds) +
+  geom_point(alpha = 1/100)
+# Q6 - The data seems to be wrapped around a depth variable of 60 and 64
+# Q7
+cor(diamonds$depth, diamonds$price)
+# Yes I could use these as predictive facots because I know that the variables would not have multicolinearity issues.
+# Q8
+ggplot(aes(carat, price), data = diamonds) +
+  geom_point()+
+  xlim(0, quantile(pf$price, 0.99))
+# Q9
+diamonds$volume <- (diamonds$x * diamonds$y * diamonds$z)
+
+ggplot(aes(volume, price), data = diamonds) +
+  geom_point()
+# Q10- Looks like there is a high correlation between the datapoints
+# Q11- We should touch on this one. Notes indicated I could do this with an & operator but I had some issues
+# Q11
+Dia <- subset(diamonds, volume <= 800)
+with(subset(diamonds, Dia >0 ), cor(Dia$volume, Dia$price))
+# Q12 
+ggplot(aes(volume, price), data = Dia) +
+  geom_point()+
+  geom_smooth(method = 'lm', color = 'red')
+# Q 13 Group Diamonds by clarity 
+diamondsByClarity <- Dia %>%
+  group_by(clarity)%>%
+  summarise(mean_price = mean(price),
+            median_price = median(price),
+            min_price = min(price),
+            max_price = max(price),
+            n = n())%>%
+  arrange(clarity)
+head(diamondsByClarity)
+# Q14
+diamonds_by_clarity <- group_by(diamonds, clarity)
+diamonds_mp_by_clarity <- summarise(diamonds_by_clarity, mean_price = mean(price))
+
+diamonds_by_color <- group_by(diamonds, color)
+diamonds_mp_by_color <- summarise(diamonds_by_color, mean_price = mean(price))
+#### issues solving this problem
+#barplot(clarity.freq[order(diamonds_mp_by_clarity, decreasing = T)], horiz = T)
+#barplot(diamonds)
+#p5<- barplot(diamonds_mp_by_clarity, names.arg = diamonds_mp_by_clarity$clarity, border = NA, las = 1)
+
+#grid.arrange(p4, p5)
+#?grid.arrange
+####  
+
+# Q 15
+
+ggplot(aes(year, cell_phone_per_100), data = subset(dat, year > 1980))+
+  geom_jitter()+
+  geom_point()
+
+ggplot(aes(year, cell_phone_per_100), data = subset(dat, year > 1980))+
+  geom_smooth(method = 'gam', color = 'red')+
+  geom_point()
